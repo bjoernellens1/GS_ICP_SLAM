@@ -81,7 +81,8 @@ RUN pip install --no-cache-dir \
     --index-url https://download.pytorch.org/whl/cu118
 
 # Install other Python dependencies
-RUN pip install --no-cache-dir --ignore-installed -r requirements.txt
+RUN pip install --no-cache-dir --ignore-installed PyYAML && \
+    pip install --no-cache-dir -r requirements.txt
 
 # ============================================================================
 # Stage 4: Build submodules
