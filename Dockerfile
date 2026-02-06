@@ -8,7 +8,7 @@ ARG UBUNTU_VERSION=20.04
 # ============================================================================
 # Stage 1: Base stage with system dependencies
 # ============================================================================
-FROM nvidia/cuda:${CUDA_VERSION}-devel-ubuntu${UBUNTU_VERSION} as base
+FROM nvidia/cuda:${CUDA_VERSION}-devel-ubuntu${UBUNTU_VERSION} AS base
 
 ARG DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
@@ -48,7 +48,7 @@ RUN python -m pip install --no-cache-dir --upgrade pip setuptools wheel
 # ============================================================================
 # Stage 2: ROS and PCL dependencies
 # ============================================================================
-FROM base as ros-builder
+FROM base AS ros-builder
 
 # Install ROS Noetic for PCL support (required for fast_gicp)
 RUN sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list' && \
@@ -65,7 +65,7 @@ RUN echo "source /opt/ros/noetic/setup.bash" >> /etc/bash.bashrc
 # ============================================================================
 # Stage 3: Python dependencies
 # ============================================================================
-FROM ros-builder as python-deps
+FROM ros-builder AS python-deps
 
 WORKDIR /app
 
@@ -86,7 +86,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # ============================================================================
 # Stage 4: Build submodules
 # ============================================================================
-FROM python-deps as submodule-builder
+FROM python-deps AS submodule-builder
 
 # Copy only what's needed for submodules
 COPY submodules /app/submodules
@@ -115,7 +115,7 @@ RUN cd submodules/simple-knn && \
 # ============================================================================
 # Stage 5: Final runtime image
 # ============================================================================
-FROM python-deps as runtime
+FROM python-deps AS runtime
 
 # Copy built submodules from builder
 COPY --from=submodule-builder /usr/local/lib/python3.9/dist-packages /usr/local/lib/python3.9/dist-packages
@@ -130,7 +130,7 @@ WORKDIR /app/GS_ICP_SLAM
 RUN mkdir -p /app/dataset /app/experiments/results
 
 # Set environment variables
-ENV PYTHONPATH=/app/GS_ICP_SLAM:$PYTHONPATH
+ENV PYTHONPATH=/app/GS_ICP_SLAM
 ENV PATH=/root/.local/bin:$PATH
 
 # Expose any necessary ports (if using network visualization)
@@ -142,7 +142,7 @@ CMD ["/bin/bash"]
 # ============================================================================
 # Stage 6: Development image with additional tools
 # ============================================================================
-FROM runtime as development
+FROM runtime AS development
 
 # Install development dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
