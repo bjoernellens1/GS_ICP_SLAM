@@ -1,0 +1,74 @@
+# Git and version control
+.git
+.gitignore
+.gitmodules
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Datasets - should be mounted as volumes
+dataset/
+datasets/
+Replica/
+TUM/
+
+# Experiments and results
+experiments/
+results/
+output/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.log
+
+# Documentation
+*.md
+docs/
+assets/
+
+# CI/CD
+.github/
+
+# Mac
+.DS_Store
+
+# Large binary files that should be excluded
+*.zip
+*.tar.gz
+*.tar
+*.onnx
+*.pth
+*.pt
+*.ckpt
+
+# Submodules (will be cloned in Dockerfile)
+submodules/*/build/
+submodules/*/.git
+
+# OpenCV build artifacts
+opencv/

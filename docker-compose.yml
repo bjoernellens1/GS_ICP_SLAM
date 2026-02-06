@@ -1,0 +1,56 @@
+services:
+  gs-icp-slam:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+      args:
+        CUDA_VERSION: "11.8.0"
+        UBUNTU_VERSION: "20.04"
+    image: gs-icp-slam:latest
+    container_name: gs-icp-slam
+    
+    # GPU support - works with both Docker and Podman
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu, compute, utility]
+    
+    # Podman-compatible runtime configuration
+    runtime: nvidia
+    
+    # Environment variables for NVIDIA
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility,graphics
+      - DISPLAY=${DISPLAY:-:0}
+      - QT_X11_NO_MITSHM=1
+      
+    # Volumes for datasets and results
+    volumes:
+      - ./dataset:/app/dataset:rw
+      - ./experiments:/app/experiments:rw
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      
+    # Shared memory size (important for multiprocessing)
+    shm_size: '12gb'
+    
+    # Network mode
+    network_mode: host
+    
+    # Enable privileged mode for full GPU access
+    privileged: true
+    
+    # Enable IPC for X11
+    ipc: host
+    
+    # TTY for interactive use
+    stdin_open: true
+    tty: true
+    
+    working_dir: /app/GS_ICP_SLAM
+    
+    command: /bin/bash
