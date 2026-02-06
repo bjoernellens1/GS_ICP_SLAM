@@ -106,11 +106,11 @@ RUN cd submodules/fast_gicp && \
 # Build and install diff-gaussian-rasterization
 # Specify CUDA architectures including sm60 for P100
 RUN cd submodules/diff-gaussian-rasterization && \
-    TORCH_CUDA_ARCH_LIST="6.0 6.1 7.0 7.5 8.0 8.6+PTX" pip install --no-cache-dir .
+    TORCH_CUDA_ARCH_LIST="6.0 6.1 7.0 7.5 8.0 8.6+PTX" pip install --no-cache-dir --no-build-isolation .
 
 # Build and install simple-knn
 RUN cd submodules/simple-knn && \
-    pip install --no-cache-dir .
+    pip install --no-cache-dir --no-build-isolation .
 
 # ============================================================================
 # Stage 5: Final runtime image
