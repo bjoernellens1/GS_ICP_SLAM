@@ -1,0 +1,68 @@
+services:
+  gs-icp-slam-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+      args:
+        CUDA_VERSION: "11.8.0"
+        UBUNTU_VERSION: "20.04"
+        USERNAME: developer
+        USER_UID: 1000
+        USER_GID: 1000
+    image: gs-icp-slam:dev
+    container_name: gs-icp-slam-dev
+    
+    # GPU support - works with both Docker and Podman
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu, compute, utility]
+    
+    # Podman-compatible runtime configuration
+    runtime: nvidia
+    
+    # Environment variables for NVIDIA and development
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility,graphics
+      - DISPLAY=${DISPLAY:-:0}
+      - QT_X11_NO_MITSHM=1
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+      
+    # Volumes for development - mount source code
+    volumes:
+      - .:/workspace:rw
+      - ./dataset:/app/dataset:rw
+      - ./experiments:/app/experiments:rw
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      # Persist pip cache
+      - pip-cache:/home/developer/.cache/pip
+      
+    # Shared memory size (important for multiprocessing)
+    shm_size: '12gb'
+    
+    # Network mode
+    network_mode: host
+    
+    # Enable privileged mode for full GPU access
+    privileged: true
+    
+    # Enable IPC for X11
+    ipc: host
+    
+    # TTY for interactive use
+    stdin_open: true
+    tty: true
+    
+    working_dir: /workspace
+    
+    command: /bin/bash
+
+volumes:
+  pip-cache:
+    driver: local

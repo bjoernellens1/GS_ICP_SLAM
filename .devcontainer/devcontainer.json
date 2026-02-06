@@ -1,0 +1,94 @@
+{
+  "name": "GS-ICP SLAM Development",
+  "dockerComposeFile": "../docker-compose.dev.yml",
+  "service": "gs-icp-slam-dev",
+  "workspaceFolder": "/workspace",
+  "shutdownAction": "stopCompose",
+  
+  // Features to install
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {
+      "version": "latest"
+    }
+  },
+  
+  // Configure tool-specific properties
+  "customizations": {
+    "vscode": {
+      // Set *default* container specific settings.json values on container create.
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/bin/python3",
+        "python.linting.enabled": true,
+        "python.linting.pylintEnabled": true,
+        "python.formatting.provider": "black",
+        "python.formatting.blackPath": "/usr/local/bin/black",
+        "python.linting.pylintPath": "/usr/local/bin/pylint",
+        "python.linting.flake8Enabled": true,
+        "python.linting.flake8Path": "/usr/local/bin/flake8",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.organizeImports": true
+        },
+        "files.exclude": {
+          "**/__pycache__": true,
+          "**/*.pyc": true
+        },
+        "terminal.integrated.defaultProfile.linux": "bash"
+      },
+      
+      // Add the IDs of extensions you want installed when the container is created.
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.black-formatter",
+        "ms-toolsai.jupyter",
+        "ms-vscode.cmake-tools",
+        "ms-vscode.cpptools",
+        "ms-vscode.cpptools-extension-pack",
+        "twxs.cmake",
+        "github.copilot",
+        "github.copilot-chat",
+        "eamodio.gitlens",
+        "streetsidesoftware.code-spell-checker",
+        "visualstudioexptteam.vscodeintellicode",
+        "redhat.vscode-yaml",
+        "ms-azuretools.vscode-docker"
+      ]
+    }
+  },
+  
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  "forwardPorts": [6009],
+  
+  // Use 'postCreateCommand' to run commands after the container is created.
+  "postCreateCommand": "bash -c 'source /opt/ros/noetic/setup.bash && echo \"Development environment ready!\"'",
+  
+  // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+  "remoteUser": "developer",
+  
+  // Configure GPU support
+  "runArgs": [
+    "--gpus=all",
+    "--runtime=nvidia",
+    "--privileged",
+    "--network=host",
+    "--shm-size=12gb",
+    "--ipc=host"
+  ],
+  
+  // Mount the host's X11 socket for GUI applications
+  "mounts": [
+    "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind"
+  ],
+  
+  // Set environment variables
+  "containerEnv": {
+    "DISPLAY": "${localEnv:DISPLAY}",
+    "NVIDIA_VISIBLE_DEVICES": "all",
+    "NVIDIA_DRIVER_CAPABILITIES": "compute,utility,graphics",
+    "QT_X11_NO_MITSHM": "1"
+  }
+}

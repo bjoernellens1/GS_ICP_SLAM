@@ -1,0 +1,98 @@
+name: Docker Build and Push
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - develop
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  # Convert repository name to lowercase for Docker registry compatibility
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    
+    strategy:
+      matrix:
+        target: [runtime, development]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: |
+            image=moby/buildkit:latest
+            network=host
+      
+      - name: Convert repository name to lowercase
+        id: repo_lowercase
+        run: |
+          echo "image_name=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+      
+      - name: Log in to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ steps.repo_lowercase.outputs.image_name }}
+          tags: |
+            type=ref,event=branch,suffix=-${{ matrix.target }}
+            type=ref,event=pr,suffix=-${{ matrix.target }}
+            type=semver,pattern={{version}},suffix=-${{ matrix.target }}
+            type=semver,pattern={{major}}.{{minor}},suffix=-${{ matrix.target }}
+            type=semver,pattern={{major}},suffix=-${{ matrix.target }}
+            type=sha,suffix=-${{ matrix.target }}
+            type=raw,value=latest,enable={{is_default_branch}},suffix=-${{ matrix.target }}
+          flavor: |
+            latest=false
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          target: ${{ matrix.target }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: |
+            type=registry,ref=${{ env.REGISTRY }}/${{ steps.repo_lowercase.outputs.image_name }}:buildcache-${{ matrix.target }}
+            type=registry,ref=${{ env.REGISTRY }}/${{ steps.repo_lowercase.outputs.image_name }}:latest-${{ matrix.target }}
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ steps.repo_lowercase.outputs.image_name }}:buildcache-${{ matrix.target }},mode=max
+          build-args: |
+            CUDA_VERSION=11.8.0
+            UBUNTU_VERSION=20.04
+            BUILDKIT_INLINE_CACHE=1
+          platforms: linux/amd64
+
+      - name: Docker image size report
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "### Docker Image Size Report - ${{ matrix.target }}" >> $GITHUB_STEP_SUMMARY
+          docker images ${{ env.REGISTRY }}/${{ steps.repo_lowercase.outputs.image_name }} --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}" >> $GITHUB_STEP_SUMMARY
