@@ -48,7 +48,6 @@ temp/
 
 # Documentation
 *.md
-!docker_folder/README.md
 docs/
 assets/
 

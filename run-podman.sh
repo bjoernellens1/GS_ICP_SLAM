@@ -84,8 +84,8 @@ run_container() {
     # Determine GPU device option
     GPU_DEVICE=""
     if check_nvidia; then
-        # Check if CDI is available
-        if podman info 2>&1 | grep -q "nvidia.com/gpu"; then
+        # Check if CDI is available by looking for nvidia devices in CDI section
+        if podman info 2>&1 | grep -i "cdi" | grep -q "nvidia"; then
             GPU_DEVICE="--device nvidia.com/gpu=all"
             print_info "Using CDI for GPU access"
         else
