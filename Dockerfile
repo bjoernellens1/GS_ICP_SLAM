@@ -120,7 +120,7 @@ FROM python-deps AS runtime
 
 # Copy built submodules from builder
 COPY --from=submodule-builder /usr/local/lib/python3.9/dist-packages /usr/local/lib/python3.9/dist-packages
-COPY --from=submodule-builder /root/.local /root/.local
+
 
 # Copy application code
 COPY . /app/GS_ICP_SLAM
