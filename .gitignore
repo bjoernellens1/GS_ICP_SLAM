@@ -90,7 +90,7 @@ submodules/*/dist/
 submodules/*/*.egg-info/
 
 # Docker
-.dockerignore
+# Keep .dockerignore for proper Docker builds
 
 # Local development
 .devcontainer/.env
