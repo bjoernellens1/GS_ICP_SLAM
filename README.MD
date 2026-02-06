@@ -129,4 +129,41 @@ cd SIBR_viewers
 ```
 
 ## Docker
-Please see the README.md in the docker_files folder.
+
+We provide a complete Docker setup for both evaluation and development with full NVIDIA GPU support (including P100/sm60).
+
+### Quick Start with Docker Compose
+
+**For Evaluation:**
+```bash
+docker compose up -d
+docker compose exec gs-icp-slam bash
+```
+
+**For Development:**
+```bash
+docker compose -f docker-compose.dev.yml up -d
+docker compose -f docker-compose.dev.yml exec gs-icp-slam-dev bash
+```
+
+**For VS Code DevContainer:**
+- Open the project in VS Code
+- Command Palette → "Dev Containers: Reopen in Container"
+
+### Pre-built Images
+
+Pull pre-built images from GitHub Container Registry:
+```bash
+docker pull ghcr.io/bjoernellens1/gs_icp_slam:latest-runtime
+docker pull ghcr.io/bjoernellens1/gs_icp_slam:latest-development
+```
+
+### Features
+- ✅ Multi-stage optimized builds for minimal image size
+- ✅ NVIDIA P100 (sm60) GPU support
+- ✅ Podman compatible
+- ✅ DevContainer support for VS Code
+- ✅ Automated CI/CD with caching
+- ✅ Dependabot for dependency updates
+
+For detailed documentation, see [docker_folder/README_NEW.md](docker_folder/README_NEW.md).
