@@ -111,7 +111,7 @@ RUN cd submodules/diff-gaussian-rasterization && \
 
 # Build and install simple-knn
 RUN cd submodules/simple-knn && \
-    pip install --no-cache-dir --no-build-isolation .
+    TORCH_CUDA_ARCH_LIST="6.0 6.1 7.0 7.5 8.0 8.6+PTX" pip install --no-cache-dir --no-build-isolation .
 
 # ============================================================================
 # Stage 5: Final runtime image
